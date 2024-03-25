@@ -1,6 +1,0 @@
-
-backend
-    Schema:
-        user
-        session
-        Note: when users sends a connection to someone, we create a new session. (can also call it a lobby/room)
