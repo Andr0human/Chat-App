@@ -38,6 +38,7 @@ class Server {
 
     run = async (): Promise<void> => {
         this.app.listen(this.config.port, () => {
+            console.info(`Node Server Running In ${this.config.devMode} On Port http://localhost:${this.config.port}`);
             logger.info(`Node Server Running In ${this.config.devMode} On Port http://localhost:${this.config.port}`);
         });
     };
