@@ -2,46 +2,65 @@ import cors from 'cors';
 import express from 'express';
 import morgan from 'morgan';
 import { IServerConfig } from './config';
-import router from './routes';
+import Database from './lib/database';
 import logger from './lib/logger';
+import router from './routes';
 
 class Server {
-    private readonly app: express.Application;
+  private readonly app: express.Application;
 
-    private readonly config: IServerConfig;
+  private readonly config: IServerConfig;
 
-    constructor(config: IServerConfig) {
-        this.app = express();
-        this.config = config;
+  private readonly database: Database;
 
-        this.bootStrap();
-    }
+  constructor(config: IServerConfig) {
+    this.app = express();
+    this.config = config;
+    this.database = Database.getInstance(this.config.mongoUrl);
 
-    getApp(): express.Application {
-        return this.app;
-    }
+    this.bootStrap();
+  }
 
-    private bootStrap(): void {
-        this.configureMiddlewares();
-        this.configureRoutes();
-    }
+  getApp(): express.Application {
+    return this.app;
+  }
 
-    private configureMiddlewares(): void {
-        this.app.use(express.json());
-        this.app.use(cors());
-        this.app.use(morgan('dev'));
-    }
+  private bootStrap(): void {
+    this.configureMiddlewares();
+    this.configureRoutes();
+  }
 
-    private configureRoutes(): void {
-        this.app.use(router);
-    }
+  private configureMiddlewares(): void {
+    this.app.use(express.json());
+    this.app.use(cors());
+    this.app.use(morgan('dev'));
+  }
 
-    run = async (): Promise<void> => {
-        this.app.listen(this.config.port, () => {
-            console.info(`Node Server Running In ${this.config.devMode} On Port http://localhost:${this.config.port}`);
-            logger.info(`Node Server Running In ${this.config.devMode} On Port http://localhost:${this.config.port}`);
-        });
-    };
+  private configureRoutes(): void {
+    this.app.use(router);
+  }
+
+  connectDB = async (): Promise<void> => {
+    await this.database.connect();
+  };
+
+  disconnectDB = async (): Promise<void> => {
+    await this.database.disconnect();
+  };
+
+  run = async (): Promise<void> => {
+    // connect to DB
+    await this.connectDB();
+
+    this.app.listen(this.config.port, () => {
+      console.info(
+        `Node Server Running In ${this.config.devMode} On Port http://localhost:${this.config.port}`
+      );
+      logger.info(
+        `Node Server Running In ${this.config.devMode} On Port http://localhost:${this.config.port}`
+      );
+    });
+  };
 }
 
 export default Server;

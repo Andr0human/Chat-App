@@ -1,5 +1,5 @@
 import IBase from './interface';
+import BaseRepository from './Repository';
+import BaseValidation from './Validation';
 
-export {
-    IBase,
-};
+export { BaseRepository, BaseValidation, IBase };
